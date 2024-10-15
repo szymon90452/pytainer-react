@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, MoreHorizontal, Play, Square, RefreshCw, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 // Mock data for containers
 const containers = [
@@ -26,6 +27,8 @@ const containers = [
 ]
 
 const ScriptsPage = () => {
+    const navigate = useNavigate();
+
     const [searchTerm, setSearchTerm] = useState<string>('')
 
     const filteredContainers = containers.filter(container =>
@@ -47,7 +50,7 @@ const ScriptsPage = () => {
                     />
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline">Add container</Button>
+                    <Button onClick={() => navigate('/scripts/add')} variant="outline">Add script</Button>
                     <Button variant="outline">Start</Button>
                     <Button variant="outline">Stop</Button>
                     <Button variant="outline">Kill</Button>

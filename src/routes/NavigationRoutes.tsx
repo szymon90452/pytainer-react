@@ -7,6 +7,8 @@ import PrivateTemplate from "@/components/templates/PrivateTemplate/PrivateTempl
 import MainPage from "@/components/pages/MainPage/MainPage";
 import ScriptsPage from "@/components/pages/ScriptsPage/ScriptsPage";
 import ScriptPage from "@/components/pages/ScriptPage/ScriptPage";
+import AddScriptPage from "@/components/pages/AddScriptPage/AddScriptPage";
+import UsersPage from "@/components/pages/UsersPage/UsersPage";
 
 const NavigationRoutes = () => {
     return (
@@ -44,10 +46,26 @@ const NavigationRoutes = () => {
                         }
                     />
                     <Route
+                        path="/scripts/add"
+                        element={
+                            <Suspense fallback={null}>
+                                <AddScriptPage />
+                            </Suspense>
+                        }
+                    />
+                    <Route
                         path="/script"
                         element={
                             <Suspense fallback={null}>
                                 <ScriptPage />
+                            </Suspense>
+                        }
+                    />
+                    <Route
+                        path="/users"
+                        element={
+                            <Suspense fallback={null}>
+                                <UsersPage />
                             </Suspense>
                         }
                     />

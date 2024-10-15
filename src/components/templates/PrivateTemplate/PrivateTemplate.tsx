@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Outlet } from "react-router-dom";
-import { Menu, X, User, Home, Settings, HelpCircle, LogOut, FileCode } from "lucide-react"
+import { Outlet, useNavigate } from "react-router-dom";
+import { Menu, X, User, Home, Settings, HelpCircle, LogOut, FileCode, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,8 +11,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label";
 
 const PrivateTemplate = () => {
+    const navigate = useNavigate();
+
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
 
     return (
@@ -22,6 +25,7 @@ const PrivateTemplate = () => {
                     <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                         {isSidebarOpen ? <X /> : <Menu />}
                     </Button>
+                    <Label className="cursor-pointer" onClick={() => navigate('/')} >Pythainer</Label>
                     <div className="flex-1" />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -61,21 +65,17 @@ const PrivateTemplate = () => {
                         }`}
                 >
                     <nav className="space-y-2 p-4">
-                        <Button variant="ghost" className="w-full justify-start">
+                        <Button onClick={() => navigate('/')} variant="ghost" className="w-full justify-start">
                             <Home className="mr-2 h-4 w-4" />
                             Home
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start">
+                        <Button onClick={() => navigate('/scripts')} variant="ghost" className="w-full justify-start">
                             <FileCode className="mr-2 h-4 w-4" />
                             Scripts
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start">
-                            <Settings className="mr-2 h-4 w-4" />
-                            Settings
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start">
-                            <HelpCircle className="mr-2 h-4 w-4" />
-                            Help
+                        <Button onClick={() => navigate('/users')} variant="ghost" className="w-full justify-start">
+                            <Users className="mr-2 h-4 w-4" />
+                            Users
                         </Button>
                     </nav>
                 </aside>
