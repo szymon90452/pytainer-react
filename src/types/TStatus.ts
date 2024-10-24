@@ -1,0 +1,1 @@
+export type TStatus = null | "loading" | "success" | "failed";

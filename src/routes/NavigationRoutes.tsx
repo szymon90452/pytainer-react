@@ -10,11 +10,15 @@ import ScriptPage from "@/components/pages/ScriptPage/ScriptPage";
 import AddScriptPage from "@/components/pages/AddScriptPage/AddScriptPage";
 import UsersPage from "@/components/pages/UsersPage/UsersPage";
 
+import GuestRoute from "@/auth/GuestRoute";
+import PrivateRoute from "@/auth/PrivateRoute";
+import PermissionRoute from "@/auth/PermissionRoute";
+
 const NavigationRoutes = () => {
     return (
         <Routes>
             {/* Route */}
-            <Route>
+            <Route element={<GuestRoute />}>
                 {/* Template */}
                 <Route element={<GuestTemplate />}>
                     <Route
@@ -27,48 +31,50 @@ const NavigationRoutes = () => {
                     />
                 </Route>
             </Route>
-            <Route>
-                <Route element={<PrivateTemplate />}>
-                    <Route
-                        path="/"
-                        element={
-                            <Suspense fallback={null}>
-                                <MainPage />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/scripts"
-                        element={
-                            <Suspense fallback={null}>
-                                <ScriptsPage />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/scripts/add"
-                        element={
-                            <Suspense fallback={null}>
-                                <AddScriptPage />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/script"
-                        element={
-                            <Suspense fallback={null}>
-                                <ScriptPage />
-                            </Suspense>
-                        }
-                    />
-                    <Route
-                        path="/users"
-                        element={
-                            <Suspense fallback={null}>
-                                <UsersPage />
-                            </Suspense>
-                        }
-                    />
+            <Route element={<PermissionRoute />}>
+                <Route element={<PrivateRoute />}>
+                    <Route element={<PrivateTemplate />}>
+                        <Route
+                            path="/"
+                            element={
+                                <Suspense fallback={null}>
+                                    <MainPage />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/scripts"
+                            element={
+                                <Suspense fallback={null}>
+                                    <ScriptsPage />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/scripts/add"
+                            element={
+                                <Suspense fallback={null}>
+                                    <AddScriptPage />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/script"
+                            element={
+                                <Suspense fallback={null}>
+                                    <ScriptPage />
+                                </Suspense>
+                            }
+                        />
+                        <Route
+                            path="/users"
+                            element={
+                                <Suspense fallback={null}>
+                                    <UsersPage />
+                                </Suspense>
+                            }
+                        />
+                    </Route>
                 </Route>
             </Route>
         </Routes>
