@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import Menu from "@/modules/Menu/Menu";
-import AccountMenu from "@/modules/AccountMenu/AccountMenu";
+// import AccountMenu from "@/modules/AccountMenu/AccountMenu";
 
 const PrivateTemplate = () => {
   const navigate = useNavigate();
@@ -27,10 +27,10 @@ const PrivateTemplate = () => {
           <Label
             className="cursor-pointer text-lg ml-4 md:text-xl md:ml-0"
             onClick={() => navigate("/")}>
-            Pythainer
+            Pytainer
           </Label>
           <div className="flex-1" />
-          <AccountMenu />
+          {/* <AccountMenu /> */}
         </div>
       </header>
       <div className="flex">
