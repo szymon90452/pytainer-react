@@ -1,88 +1,133 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { uploadScriptThunk } from "@/redux/thunk/scriptsThunk";
+import { restartUploadScriptStatus } from "@/redux/slice/scriptsSlice";
 
 const AddScriptPage = () => {
-    const [advanced, setAdvanced] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
 
-    return (
-        <div>
-            <h1 className="text-2xl font-bold mb-6">Create a new script</h1>
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                <Tabs defaultValue="general" className="w-full">
-                    <TabsList>
-                        <TabsTrigger value="general">General</TabsTrigger>
-                        <TabsTrigger value="network">Network</TabsTrigger>
-                        <TabsTrigger value="volumes">Volumes</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="general" className="space-y-4">
-                        <div>
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" placeholder="my-container" />
-                        </div>
-                        <div>
-                            <Label htmlFor="image">Image</Label>
-                            <Input id="image" placeholder="nginx:latest" />
-                        </div>
-                        <div>
-                            <Label htmlFor="command">Command</Label>
-                            <Input id="command" placeholder="/bin/bash" />
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="network" className="space-y-4">
-                        <div>
-                            <Label htmlFor="network">Network</Label>
-                            <Select>
-                                <SelectTrigger id="network">
-                                    <SelectValue placeholder="Select a network" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="bridge">bridge</SelectItem>
-                                    <SelectItem value="host">host</SelectItem>
-                                    <SelectItem value="none">none</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label htmlFor="ports">Ports</Label>
-                            <Input id="ports" placeholder="80:80, 443:443" />
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="volumes" className="space-y-4">
-                        <div>
-                            <Label htmlFor="volumes">Volumes</Label>
-                            <Textarea id="volumes" placeholder="/host/path:/container/path" />
-                        </div>
-                    </TabsContent>
-                </Tabs>
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
-                <div className="flex items-center space-x-2">
-                    <Switch id="advanced" checked={advanced} onCheckedChange={setAdvanced} />
-                    <Label htmlFor="advanced">Advanced options</Label>
-                </div>
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-                {advanced && (
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="env">Environment variables</Label>
-                            <Textarea id="env" placeholder="KEY=value" />
-                        </div>
-                        <div>
-                            <Label htmlFor="labels">Labels</Label>
-                            <Textarea id="labels" placeholder="key=value" />
-                        </div>
-                    </div>
-                )}
+  const uploadScriptStatus = useAppSelector(
+    (state) => state.scripts.uploadScriptStatus
+  );
 
-                <Button type="submit" className="w-full">Create Container</Button>
-            </form>
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+
+      if (!file.name.endsWith(".py")) {
+        toast.error("Invalid file type\nOnly Python (.py) files are allowed.");
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(
+          `File is too large\nMaximum allowed size is ${
+            MAX_FILE_SIZE / (1024 * 1024)
+          } MB.`
+        );
+        return;
+      }
+
+      setSelectedFile(file);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragActive(false);
+
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+
+      if (!file.name.endsWith(".py")) {
+        toast.error("Invalid file type. Only Python (.py) files are allowed.");
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(
+          `File is too large\nMaximum allowed size is ${
+            MAX_FILE_SIZE / (1024 * 1024)
+          } MB.`
+        );
+        return;
+      }
+
+      setSelectedFile(event.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!selectedFile) return;
+
+    dispatch(uploadScriptThunk(selectedFile));
+  };
+
+  useEffect(() => {
+    if (uploadScriptStatus === "success") {
+      dispatch(restartUploadScriptStatus());
+      navigate("/scripts");
+    }
+  }, [dispatch, uploadScriptStatus, navigate]);
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold mb-6">Add Script</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => document.getElementById("fileInput")?.click()}
+          className={`border-2 border-dashed p-6 rounded-md text-center cursor-pointer ${
+            dragActive ? "border-blue-500 bg-blue-100" : "border-gray-300"
+          }`}>
+          {selectedFile ? (
+            <p>Selected file: {selectedFile.name}</p>
+          ) : (
+            <p>
+              Drag and drop your script file here (max 5 MB), or click to select
+              one.
+            </p>
+          )}
         </div>
-    )
-}
+        <input
+          id="fileInput"
+          type="file"
+          accept=".py"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <div className="w-full flex justify-end">
+          <Button disabled={uploadScriptStatus === "loading"} type="submit">
+            Upload
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
 
-export default AddScriptPage
+export default AddScriptPage;

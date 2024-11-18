@@ -4,20 +4,26 @@ import { TStatus } from "@/types/TStatus";
 import { IScript } from "@/types/IScript";
 import {
   getAllScriptsThunk,
+  getScriptThunk,
+  removeScriptThunk,
+  restartScriptThunk,
   runScriptThunk,
   stopScriptThunk,
+  uploadScriptThunk,
 } from "../thunk/scriptsThunk";
 
 interface ScriptState {
   script?: IScript;
   scripts?: IScript[];
   getAllScriptsStatus: TStatus;
-  getScript: TStatus;
+  getScriptStatus: TStatus;
   getScriptLogsStatus: TStatus;
   getScriptStatusStatus: TStatus;
   getScriptFilesStatus: TStatus;
   runScriptStatus: TStatus;
   stopScriptStatus: TStatus;
+  restartScriptStatus: TStatus;
+  removeScriptStatus: TStatus;
   uploadScriptStatus: TStatus;
 }
 
@@ -25,19 +31,25 @@ const initialState: ScriptState = {
   script: undefined,
   scripts: undefined,
   getAllScriptsStatus: null,
-  getScript: null,
+  getScriptStatus: null,
   getScriptLogsStatus: null,
   getScriptStatusStatus: null,
   getScriptFilesStatus: null,
   runScriptStatus: null,
   stopScriptStatus: null,
+  restartScriptStatus: null,
+  removeScriptStatus: null,
   uploadScriptStatus: null,
 };
 
 const scriptSlice = createSlice({
   name: "script",
   initialState,
-  reducers: {},
+  reducers: {
+    restartUploadScriptStatus: (state) => {
+      state.uploadScriptStatus = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getAllScriptsThunk.pending, (state) => {
@@ -80,8 +92,64 @@ const scriptSlice = createSlice({
       .addCase(stopScriptThunk.rejected, (state, { payload }) => {
         state.stopScriptStatus = "failed";
         console.error(payload);
+      })
+
+      .addCase(restartScriptThunk.pending, (state) => {
+        state.restartScriptStatus = "loading";
+      })
+      .addCase(restartScriptThunk.fulfilled, (state, { payload }) => {
+        if (!state.scripts) return;
+        state.scripts = state.scripts.map((script) =>
+          script.processKey === payload.processKey ? payload : script
+        );
+        state.restartScriptStatus = "success";
+      })
+      .addCase(restartScriptThunk.rejected, (state, { payload }) => {
+        state.restartScriptStatus = "failed";
+        console.error(payload);
+      })
+
+      .addCase(removeScriptThunk.pending, (state) => {
+        state.removeScriptStatus = "loading";
+      })
+      .addCase(removeScriptThunk.fulfilled, (state, { payload }) => {
+        if (!state.scripts) return;
+        state.scripts = state.scripts.filter(
+          (script) => script.processKey !== payload.processKey
+        );
+        state.removeScriptStatus = "success";
+      })
+      .addCase(removeScriptThunk.rejected, (state, { payload }) => {
+        state.removeScriptStatus = "failed";
+        console.error(payload);
+      })
+
+      .addCase(uploadScriptThunk.pending, (state) => {
+        state.uploadScriptStatus = "loading";
+      })
+      .addCase(uploadScriptThunk.fulfilled, (state) => {
+        if (!state.scripts) return;
+        state.uploadScriptStatus = "success";
+      })
+      .addCase(uploadScriptThunk.rejected, (state, { payload }) => {
+        state.uploadScriptStatus = "failed";
+        console.error(payload);
+      })
+
+      .addCase(getScriptThunk.pending, (state) => {
+        state.getScriptStatus = "loading";
+      })
+      .addCase(getScriptThunk.fulfilled, (state, { payload }) => {
+        state.script = payload;
+        state.getScriptStatus = "success";
+      })
+      .addCase(getScriptThunk.rejected, (state, { payload }) => {
+        state.getScriptStatus = "failed";
+        console.error(payload);
       });
   },
 });
+
+export const { restartUploadScriptStatus } = scriptSlice.actions;
 
 export default scriptSlice.reducer;

@@ -22,13 +22,14 @@ import {
   Play,
   Square,
   RefreshCw,
-  // Trash2,
   PlusCircle,
+  Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import {
   getAllScriptsThunk,
+  removeScriptThunk,
   runScriptThunk,
   stopScriptThunk,
 } from "@/redux/thunk/scriptsThunk";
@@ -163,10 +164,13 @@ const ScriptsPage = () => {
                           <RefreshCw className="mr-2 h-4 w-4" />
                           <span>Restart</span>
                         </DropdownMenuItem>
-                        {/* <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            dispatch(removeScriptThunk(script.processKey));
+                          }}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           <span>Remove</span>
-                        </DropdownMenuItem> */}
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
