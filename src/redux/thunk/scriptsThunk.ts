@@ -193,3 +193,31 @@ export const removeScriptThunk = createAsyncThunk(
     }
   }
 );
+
+export const getScriptLogsThunk = createAsyncThunk(
+  "scripts/fetchScriptLogs",
+  async (
+    { processKey, maxLines = 100 }: { processKey: string; maxLines?: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await fetch(
+        `http://localhost:2137/api/v1/script/log?processKey=${encodeURIComponent(
+          processKey
+        )}&maxLines=${maxLines}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.text();
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to fetch script logs");
+    }
+  }
+);

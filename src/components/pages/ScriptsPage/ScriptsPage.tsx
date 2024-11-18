@@ -36,19 +36,28 @@ import {
 import clsx from "clsx";
 import { ScriptStatus } from "@/types/IScript";
 import { formatDateTime } from "@/functions/formatDateTime";
+import { restartRemoveScriptStatus } from "@/redux/slice/scriptsSlice";
 
 const ScriptsPage = () => {
   const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
 
-  const scripts = useAppSelector((state) => state.scripts.scripts);
+  const { scripts, removeScriptStatus } = useAppSelector(
+    (state) => state.scripts
+  );
 
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     dispatch(getAllScriptsThunk());
   }, []);
+
+  useEffect(() => {
+    if (removeScriptStatus === "success") {
+      dispatch(restartRemoveScriptStatus());
+    }
+  }, [dispatch, removeScriptStatus, navigate]);
 
   const filteredScripts =
     scripts &&
@@ -106,7 +115,11 @@ const ScriptsPage = () => {
                     <Checkbox />
                   </TableCell> */}
                   <TableCell>
-                    <div>{script.name}</div>
+                    <div
+                      className="font-semibold text-lg cursor-pointer max-w-40"
+                      onClick={() => navigate(`/script/${script.processKey}`)}>
+                      {script.name}
+                    </div>
                     <div className="text-sm text-gray-500">
                       {script.filePath}
                     </div>

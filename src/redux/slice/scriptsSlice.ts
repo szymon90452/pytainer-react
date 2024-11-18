@@ -4,6 +4,7 @@ import { TStatus } from "@/types/TStatus";
 import { IScript } from "@/types/IScript";
 import {
   getAllScriptsThunk,
+  getScriptLogsThunk,
   getScriptThunk,
   removeScriptThunk,
   restartScriptThunk,
@@ -14,6 +15,7 @@ import {
 
 interface ScriptState {
   script?: IScript;
+  scriptLogs: string;
   scripts?: IScript[];
   getAllScriptsStatus: TStatus;
   getScriptStatus: TStatus;
@@ -29,6 +31,7 @@ interface ScriptState {
 
 const initialState: ScriptState = {
   script: undefined,
+  scriptLogs: "",
   scripts: undefined,
   getAllScriptsStatus: null,
   getScriptStatus: null,
@@ -49,6 +52,9 @@ const scriptSlice = createSlice({
     restartUploadScriptStatus: (state) => {
       state.uploadScriptStatus = null;
     },
+    restartRemoveScriptStatus: (state) => {
+      state.removeScriptStatus = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -68,6 +74,7 @@ const scriptSlice = createSlice({
         state.runScriptStatus = "loading";
       })
       .addCase(runScriptThunk.fulfilled, (state, { payload }) => {
+        state.script = payload;
         if (!state.scripts) return;
         state.scripts = state.scripts.map((script) =>
           script.processKey === payload.processKey ? payload : script
@@ -83,6 +90,7 @@ const scriptSlice = createSlice({
         state.stopScriptStatus = "loading";
       })
       .addCase(stopScriptThunk.fulfilled, (state, { payload }) => {
+        state.script = payload;
         if (!state.scripts) return;
         state.scripts = state.scripts.map((script) =>
           script.processKey === payload.processKey ? payload : script
@@ -98,6 +106,7 @@ const scriptSlice = createSlice({
         state.restartScriptStatus = "loading";
       })
       .addCase(restartScriptThunk.fulfilled, (state, { payload }) => {
+        state.script = payload;
         if (!state.scripts) return;
         state.scripts = state.scripts.map((script) =>
           script.processKey === payload.processKey ? payload : script
@@ -146,10 +155,23 @@ const scriptSlice = createSlice({
       .addCase(getScriptThunk.rejected, (state, { payload }) => {
         state.getScriptStatus = "failed";
         console.error(payload);
+      })
+
+      .addCase(getScriptLogsThunk.pending, (state) => {
+        state.getScriptLogsStatus = "loading";
+      })
+      .addCase(getScriptLogsThunk.fulfilled, (state, { payload }) => {
+        state.scriptLogs = payload;
+        state.getScriptLogsStatus = "success";
+      })
+      .addCase(getScriptLogsThunk.rejected, (state, { payload }) => {
+        state.getScriptLogsStatus = "failed";
+        console.error(payload);
       });
   },
 });
 
-export const { restartUploadScriptStatus } = scriptSlice.actions;
+export const { restartUploadScriptStatus, restartRemoveScriptStatus } =
+  scriptSlice.actions;
 
 export default scriptSlice.reducer;
