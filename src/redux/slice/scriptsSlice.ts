@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { TStatus } from "@/types/TStatus";
 import { IScript } from "@/types/IScript";
@@ -6,6 +6,7 @@ import {
   getAllScriptsThunk,
   getScriptLogsThunk,
   getScriptThunk,
+  getStaticScriptLogsThunk,
   removeScriptThunk,
   restartScriptThunk,
   runScriptThunk,
@@ -54,6 +55,9 @@ const scriptSlice = createSlice({
     },
     restartRemoveScriptStatus: (state) => {
       state.removeScriptStatus = null;
+    },
+    addLogChunk: (state, action: PayloadAction<string>) => {
+      state.scriptLogs = state.scriptLogs + action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -158,20 +162,36 @@ const scriptSlice = createSlice({
       })
 
       .addCase(getScriptLogsThunk.pending, (state) => {
+        state.scriptLogs = "";
         state.getScriptLogsStatus = "loading";
       })
-      .addCase(getScriptLogsThunk.fulfilled, (state, { payload }) => {
-        state.scriptLogs = payload;
+      .addCase(getScriptLogsThunk.fulfilled, (state) => {
         state.getScriptLogsStatus = "success";
       })
       .addCase(getScriptLogsThunk.rejected, (state, { payload }) => {
+        state.getScriptLogsStatus = "failed";
+        console.error(payload);
+      })
+
+      .addCase(getStaticScriptLogsThunk.pending, (state) => {
+        state.getScriptLogsStatus = "loading";
+      })
+      .addCase(getStaticScriptLogsThunk.fulfilled, (state, { payload }) => {
+        state.scriptLogs = payload;
+        state.getScriptLogsStatus = "success";
+      })
+      .addCase(getStaticScriptLogsThunk.rejected, (state, { payload }) => {
+        state.scriptLogs = "";
         state.getScriptLogsStatus = "failed";
         console.error(payload);
       });
   },
 });
 
-export const { restartUploadScriptStatus, restartRemoveScriptStatus } =
-  scriptSlice.actions;
+export const {
+  restartUploadScriptStatus,
+  restartRemoveScriptStatus,
+  addLogChunk,
+} = scriptSlice.actions;
 
 export default scriptSlice.reducer;

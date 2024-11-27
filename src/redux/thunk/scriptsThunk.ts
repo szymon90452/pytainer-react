@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
+import { addLogChunk } from "../slice/scriptsSlice";
 
 export const getAllScriptsThunk = createAsyncThunk(
   "scripts/getAllScripts",
@@ -196,6 +197,49 @@ export const removeScriptThunk = createAsyncThunk(
 
 export const getScriptLogsThunk = createAsyncThunk(
   "scripts/fetchScriptLogs",
+  async (
+    { processKey }: { processKey: string },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      const response = await fetch(
+        `http://localhost:2137/api/v1/script/log/stream?processKey=${encodeURIComponent(
+          processKey
+        )}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("ReadableStream reader not available");
+
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        done = streamDone;
+
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          dispatch(addLogChunk(chunk));
+        }
+      }
+
+      return "Stream completed";
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to fetch script logs");
+    }
+  }
+);
+
+export const getStaticScriptLogsThunk = createAsyncThunk(
+  "scripts/fetchStaticScriptLogs",
   async (
     { processKey, maxLines = 100 }: { processKey: string; maxLines?: number },
     { rejectWithValue }

@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import {
   getScriptLogsThunk,
   getScriptThunk,
+  getStaticScriptLogsThunk,
   removeScriptThunk,
   runScriptThunk,
   stopScriptThunk,
@@ -40,7 +41,11 @@ const ScriptPage = () => {
 
   useEffect(() => {
     if (script) {
-      dispatch(getScriptLogsThunk({ processKey: script.processKey }));
+      if (script.status === ScriptStatus.RUNNING) {
+        dispatch(getScriptLogsThunk({ processKey: script.processKey }));
+      } else {
+        dispatch(getStaticScriptLogsThunk({ processKey: script.processKey }));
+      }
     }
   }, [dispatch, script]);
 
@@ -117,14 +122,14 @@ const ScriptPage = () => {
             <CardTitle>Script Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <dl className="grid grid-cols-1 gap-2 text-sm">
+            <dl className="grid grid-cols-1 gap-2 text-sm overflow-hidden">
               <div className="flex justify-between">
                 <dt className="font-medium">Name:</dt>
                 <dd>{script.name}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-medium">File Path:</dt>
-                <dd>{script.filePath}</dd>
+                <dd className="text-clip">{script.filePath}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-medium">Process Key:</dt>
@@ -178,7 +183,7 @@ const ScriptPage = () => {
               <CardTitle>Script Logs</CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto whitespace-pre-wrap">
+              <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto whitespace-pre-wrap max-h-60 overflow-auto">
                 {scriptLogs && scriptLogs}
               </pre>
             </CardContent>

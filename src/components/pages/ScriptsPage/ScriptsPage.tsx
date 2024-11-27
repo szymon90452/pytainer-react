@@ -37,13 +37,15 @@ import clsx from "clsx";
 import { ScriptStatus } from "@/types/IScript";
 import { formatDateTime } from "@/functions/formatDateTime";
 import { restartRemoveScriptStatus } from "@/redux/slice/scriptsSlice";
+import { FaBuffer } from "react-icons/fa";
+import { ThreeCircles } from "react-loader-spinner";
 
 const ScriptsPage = () => {
   const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
 
-  const { scripts, removeScriptStatus } = useAppSelector(
+  const { scripts, removeScriptStatus, getAllScriptsStatus } = useAppSelector(
     (state) => state.scripts
   );
 
@@ -94,104 +96,134 @@ const ScriptsPage = () => {
           <Button variant="outline">Remove</Button> */}
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {/* <TableHead className="w-12">
+
+      {getAllScriptsStatus === "loading" && (
+        <div className="w-full flex items-center justify-center">
+          <ThreeCircles
+            visible={true}
+            height="100"
+            width="100"
+            color="#a5a5a5"
+            ariaLabel="three-circles-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+        </div>
+      )}
+      {filteredScripts &&
+        filteredScripts?.length === 0 &&
+        getAllScriptsStatus === "success" && (
+          <div className="w-full text-xl text-center">
+            Add the script to view it in the list
+            <div className="w-full flex items-center justify-center mt-4 text-3xl">
+              <FaBuffer />
+            </div>
+          </div>
+        )}
+      {filteredScripts &&
+        filteredScripts?.length > 0 &&
+        getAllScriptsStatus === "success" && (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {/* <TableHead className="w-12">
                 <Checkbox />
               </TableHead> */}
-              <TableHead>Name</TableHead>
-              <TableHead>State</TableHead>
-              <TableHead>Last Execution</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredScripts &&
-              filteredScripts.map((script) => (
-                <TableRow key={script.processKey}>
-                  {/* <TableCell>
+                  <TableHead>Name</TableHead>
+                  <TableHead>State</TableHead>
+                  <TableHead>Last Execution</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredScripts &&
+                  filteredScripts.map((script) => (
+                    <TableRow key={script.processKey}>
+                      {/* <TableCell>
                     <Checkbox />
                   </TableCell> */}
-                  <TableCell>
-                    <div
-                      className="font-semibold text-lg cursor-pointer max-w-40"
-                      onClick={() => navigate(`/script/${script.processKey}`)}>
-                      {script.name}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {script.filePath}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={clsx(
-                        "inline-block px-2 py-1 rounded-full text-xs",
-                        {
-                          "bg-gray-100 text-gray-800":
-                            script.status === ScriptStatus.NOT_STARTED,
-                          "bg-green-100 text-green-800":
-                            script.status === ScriptStatus.RUNNING,
-                          "bg-red-100 text-red-800":
-                            script.status === ScriptStatus.FAILED,
-                          "bg-yellow-100 text-yellow-800":
-                            script.status === ScriptStatus.STOPPED,
-                        }
-                      )}>
-                      {script.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {formatDateTime(script.lastExecutionTime)}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            dispatch(runScriptThunk(script.processKey));
-                          }}>
-                          <Play className="mr-2 h-4 w-4" />
-                          <span>Start</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            dispatch(stopScriptThunk(script.processKey));
-                          }}>
-                          <Square className="mr-2 h-4 w-4" />
-                          <span>Stop</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            dispatch(stopScriptThunk(script.processKey));
-                            setTimeout(() => {
-                              dispatch(runScriptThunk(script.processKey));
-                            }, 1000);
-                          }}>
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                          <span>Restart</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            dispatch(removeScriptThunk(script.processKey));
-                          }}>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Remove</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </div>
+                      <TableCell>
+                        <div
+                          className="font-semibold text-lg cursor-pointer max-w-40"
+                          onClick={() =>
+                            navigate(`/script/${script.processKey}`)
+                          }>
+                          {script.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {script.filePath}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={clsx(
+                            "inline-block px-2 py-1 rounded-full text-xs",
+                            {
+                              "bg-gray-100 text-gray-800":
+                                script.status === ScriptStatus.NOT_STARTED,
+                              "bg-green-100 text-green-800":
+                                script.status === ScriptStatus.RUNNING,
+                              "bg-red-100 text-red-800":
+                                script.status === ScriptStatus.FAILED,
+                              "bg-yellow-100 text-yellow-800":
+                                script.status === ScriptStatus.STOPPED,
+                            }
+                          )}>
+                          {script.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {formatDateTime(script.lastExecutionTime)}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch(runScriptThunk(script.processKey));
+                              }}>
+                              <Play className="mr-2 h-4 w-4" />
+                              <span>Start</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch(stopScriptThunk(script.processKey));
+                              }}>
+                              <Square className="mr-2 h-4 w-4" />
+                              <span>Stop</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch(stopScriptThunk(script.processKey));
+                                setTimeout(() => {
+                                  dispatch(runScriptThunk(script.processKey));
+                                }, 1000);
+                              }}>
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              <span>Restart</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch(removeScriptThunk(script.processKey));
+                              }}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Remove</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
     </div>
   );
 };
