@@ -7,12 +7,15 @@ export const getAllScriptsThunk = createAsyncThunk(
   "scripts/getAllScripts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch("http://localhost:2137/api/v1/script/all", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/all",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -31,7 +34,7 @@ export const runScriptThunk = createAsyncThunk(
   async (processKey: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/run?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/run?processKey=${encodeURIComponent(
           processKey
         )}`,
         {
@@ -60,7 +63,7 @@ export const stopScriptThunk = createAsyncThunk(
   async (processKey: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/stop?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/stop?processKey=${encodeURIComponent(
           processKey
         )}`,
         {
@@ -89,7 +92,7 @@ export const restartScriptThunk = createAsyncThunk(
   async (processKey: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/restart?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/restart?processKey=${encodeURIComponent(
           processKey
         )}`,
         {
@@ -121,7 +124,7 @@ export const uploadScriptThunk = createAsyncThunk(
       formData.append("file", file);
 
       const response = await fetch(
-        "http://localhost:2137/api/v1/script/upload",
+        "https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/upload",
         {
           method: "POST",
           body: formData,
@@ -146,7 +149,7 @@ export const getScriptThunk = createAsyncThunk(
   async (processKey: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/process-key?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/process-key?processKey=${encodeURIComponent(
           processKey
         )}`,
         {
@@ -174,7 +177,7 @@ export const removeScriptThunk = createAsyncThunk(
   async (processKey: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/remove?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/remove?processKey=${encodeURIComponent(
           processKey
         )}`,
         {
@@ -203,7 +206,7 @@ export const getScriptLogsThunk = createAsyncThunk(
   ) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/log/stream?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/log/stream?processKey=${encodeURIComponent(
           processKey
         )}`,
         {
@@ -246,7 +249,7 @@ export const getStaticScriptLogsThunk = createAsyncThunk(
   ) => {
     try {
       const response = await fetch(
-        `http://localhost:2137/api/v1/script/log?processKey=${encodeURIComponent(
+        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/script/log?processKey=${encodeURIComponent(
           processKey
         )}&maxLines=${maxLines}`,
         {
