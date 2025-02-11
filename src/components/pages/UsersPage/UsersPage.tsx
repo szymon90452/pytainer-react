@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -98,8 +97,12 @@ const UsersPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">
-                <Checkbox />
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => handleSort("fullName")}>
+                Full name{" "}
+                {sortColumn === "fullName" &&
+                  (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
               <TableHead
                 className="cursor-pointer"
@@ -108,31 +111,14 @@ const UsersPage = () => {
                 {sortColumn === "username" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("role")}>
-                Role{" "}
-                {sortColumn === "role" && (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("authMethod")}>
-                Auth method{" "}
-                {sortColumn === "authMethod" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
-                <TableCell>
-                  <Checkbox />
-                </TableCell>
-                <TableCell>{user.username}</TableCell>
                 <TableCell>{user.role}</TableCell>
-                <TableCell>{user.authMethod}</TableCell>
+                <TableCell>{user.username}</TableCell>
                 <TableCell>
                   <Button variant="ghost" size="icon">
                     <Edit className="h-4 w-4" />

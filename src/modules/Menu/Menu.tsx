@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { FileCode, Home } from "lucide-react";
+import { FileCode, Home, Users } from "lucide-react";
 
 const Menu = ({ isSidebarOpen }: { isSidebarOpen: boolean }) => {
   const navigate = useNavigate();
@@ -26,13 +26,13 @@ const Menu = ({ isSidebarOpen }: { isSidebarOpen: boolean }) => {
           <FileCode className="mr-2 h-4 w-4" />
           Scripts
         </Button>
-        {/* <Button
+        <Button
           onClick={() => navigate("/users")}
           variant="ghost"
           className="w-full justify-start">
           <Users className="mr-2 h-4 w-4" />
           Users
-        </Button> */}
+        </Button>
       </nav>
     </aside>
   );
