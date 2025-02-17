@@ -1,16 +1,24 @@
-import { User, Settings, HelpCircle, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const AccountMenu = () => {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    toast.success("You have been logged out.");
+    navigate("/login");
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -20,7 +28,7 @@ const AccountMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        {/* <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <User className="mr-2 h-4 w-4" />
@@ -34,8 +42,8 @@ const AccountMenu = () => {
           <HelpCircle className="mr-2 h-4 w-4" />
           Help
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuSeparator /> */}
+        <DropdownMenuItem onClick={logout}>
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>

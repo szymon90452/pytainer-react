@@ -13,6 +13,7 @@ import UsersPage from "@/components/pages/UsersPage/UsersPage";
 import GuestRoute from "@/auth/GuestRoute";
 import PrivateRoute from "@/auth/PrivateRoute";
 import PermissionRoute from "@/auth/PermissionRoute";
+import AddUserPage from "@/components/pages/AddUserPage/AddUserPage";
 
 const NavigationRoutes = () => {
   return (
@@ -69,6 +70,14 @@ const NavigationRoutes = () => {
               element={
                 <Suspense fallback={null}>
                   <UsersPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/users/add"
+              element={
+                <Suspense fallback={null}>
+                  <AddUserPage />
                 </Suspense>
               }
             />

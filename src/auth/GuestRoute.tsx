@@ -1,10 +1,9 @@
-import { useAppSelector } from "@/hooks/useRedux";
 import { Navigate, Outlet } from "react-router-dom";
 
 const GuestRoute = () => {
-    const user = useAppSelector((state) => state.user.user);
+  const token = localStorage.getItem("token");
 
-    return user ? <Navigate to="/" /> : <Outlet />;
+  return token ? <Navigate to="/" /> : <Outlet />;
 };
 
 export default GuestRoute;

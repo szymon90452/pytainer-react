@@ -14,20 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { getUsersThunk } from "@/redux/thunk/userThunk";
+import { useNavigate } from "react-router-dom";
+import DeleteUserDialog from "@/components/dialogs/DeleteUserDialog";
 
 const UsersPage = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const users = useAppSelector((state) => state.user.users);
   const [filteredUsers, setFilteredUsers] = useState(users);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,16 +31,7 @@ const UsersPage = () => {
   const [sortDirection, setSortDirection] = useState("asc");
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
-
-  const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const [formData, setFormData] = useState({
-    id: null,
-    fullName: "",
-    username: "",
-    password: "",
-  });
 
   useEffect(() => {
     const filtered = users.filter(
@@ -77,26 +64,6 @@ const UsersPage = () => {
     setDeleteOpen(false);
   };
 
-  const handleEditClick = (user: any) => {
-    setFormData({
-      id: user.id,
-      fullName: user.fullName,
-      username: user.username,
-      password: "",
-    });
-    setOpen(true);
-  };
-
-  const handleAddClick = () => {
-    setFormData({
-      id: null,
-      fullName: "",
-      username: "",
-      password: "",
-    });
-    setOpen(true);
-  };
-
   useEffect(() => {
     const sorted = [...filteredUsers].sort((a: any, b: any) => {
       if (a[sortColumn] < b[sortColumn])
@@ -110,7 +77,7 @@ const UsersPage = () => {
 
   useEffect(() => {
     dispatch(getUsersThunk());
-  }, [])
+  }, []);
 
   return (
     <div>
@@ -129,7 +96,7 @@ const UsersPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" onClick={handleAddClick}>
+        <Button variant="outline" onClick={() => navigate("/users/add")}>
           <PlusCircle className="mr-2 h-4 w-4" /> Add user
         </Button>
       </div>
@@ -137,20 +104,8 @@ const UsersPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("fullName")}>
-                Full name{" "}
-                {sortColumn === "fullName" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("username")}>
-                Username{" "}
-                {sortColumn === "username" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
+              <TableHead>Full name</TableHead>
+              <TableHead>Username</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -160,10 +115,7 @@ const UsersPage = () => {
                 <TableCell>{user.fullName}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditClick(user)}>
+                  <Button variant="ghost" size="icon" onClick={() => {}}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
@@ -179,68 +131,13 @@ const UsersPage = () => {
         </Table>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {formData.id ? "Edit user" : "Add new user"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={() => {}} className="space-y-4">
-            <Label>Full Name</Label>
-            <Input
-              value={formData.fullName}
-              onChange={(e) =>
-                setFormData({ ...formData, fullName: e.target.value })
-              }
-              required
-            />
-
-            <Label>Username</Label>
-            <Input
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
-              required
-            />
-
-            <Label>Password</Label>
-            <Input
-              type="password"
-              value={formData.password}
-              placeholder={formData.id ? "********" : ""}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              required={formData.id ? false : true}
-            />
-
-            <Button type="submit" className="w-full">
-              {formData.id ? "Update User" : "Add User"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Are you sure you want to delete this user?
-            </DialogTitle>
-          </DialogHeader>
-          <p>This action cannot be undone. Are you sure?</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-              No
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Yes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteUserDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={() => {
+          setDeleteOpen(false);
+        }}
+      />
     </div>
   );
 };

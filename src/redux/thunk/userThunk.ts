@@ -6,7 +6,7 @@ const API_BASE_URL = "http://localhost:2137/api/v1/auth";
 
 const getAuthHeaders = () => ({
   "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("token")}`
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 export const loginUserThunk = createAsyncThunk(
