@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
@@ -22,13 +23,13 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
-import { useAppSelector } from "@/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { getUsersThunk } from "@/redux/thunk/userThunk";
 
 const UsersPage = () => {
-  const initialUsers = useAppSelector((state) => state.user.users);
-
-  const [users, setUsers] = useState(initialUsers);
-  const [filteredUsers, setFilteredUsers] = useState(initialUsers);
+  const dispatch = useAppDispatch();
+  const users = useAppSelector((state) => state.user.users);
+  const [filteredUsers, setFilteredUsers] = useState(users);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumn, setSortColumn] = useState("username");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -70,7 +71,7 @@ const UsersPage = () => {
 
   const confirmDelete = () => {
     if (selectedUser) {
-      setUsers(users.filter((u) => u.id !== selectedUser.id));
+      // setUsers(users.filter((u) => u.id !== selectedUser.id));
       toast.success("User has been deleted!");
     }
     setDeleteOpen(false);
@@ -96,28 +97,6 @@ const UsersPage = () => {
     setOpen(true);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (formData.id) {
-      setUsers(
-        users.map((user) =>
-          user.id === formData.id ? { ...user, ...formData } : user
-        )
-      );
-      toast.success("User has been updated!");
-    } else {
-      const newUser = {
-        id: Date.now(),
-        fullName: formData.fullName,
-        username: formData.username,
-        password: formData.password,
-      };
-      setUsers([...users, newUser]);
-      toast.success("User has been added!");
-    }
-    setOpen(false);
-  };
-
   useEffect(() => {
     const sorted = [...filteredUsers].sort((a: any, b: any) => {
       if (a[sortColumn] < b[sortColumn])
@@ -128,6 +107,10 @@ const UsersPage = () => {
     });
     setFilteredUsers(sorted);
   }, [sortColumn, sortDirection]);
+
+  useEffect(() => {
+    dispatch(getUsersThunk());
+  }, [])
 
   return (
     <div>
@@ -203,7 +186,7 @@ const UsersPage = () => {
               {formData.id ? "Edit user" : "Add new user"}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={() => {}} className="space-y-4">
             <Label>Full Name</Label>
             <Input
               value={formData.fullName}

@@ -2,58 +2,80 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 
-export const fetchUserThunk = createAsyncThunk(
-  "users/fetchUser",
-  async ({ uuid }: { uuid: string | null }, { rejectWithValue }) => {
-    try {
-      if (!uuid) return null;
+const API_BASE_URL = "http://localhost:2137/api/v1/auth";
 
-      const response = await fetch(
-        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/user/${uuid}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to fetch user");
-    }
-  }
-);
+const getAuthHeaders = () => ({
+  "Content-Type": "application/json",
+  "Authorization": `Bearer ${localStorage.getItem("token")}`
+});
 
 export const loginUserThunk = createAsyncThunk(
   "users/loginUser",
   async (
-    { email, password }: { email: string; password: string },
+    { username, password }: { username: string; password: string },
     { rejectWithValue }
   ) => {
     try {
-      const response = await fetch(
-        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      // Logowanie jako konto klienta, aby uzyskać token admina
+      // const clientLoginResponse = await fetch(`${API_BASE_URL}/login`, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/x-www-form-urlencoded",
+      //   },
+      //   body: new URLSearchParams({
+      //     client_id: "pytainerfrontend",
+      //     grant_type: "password",
+      //     username: "frontend",
+      //     password: "SomeFrontendPassword123!",
+      //   }).toString(),
+      // });
 
-      if (!response.ok) {
+      // if (!clientLoginResponse.ok) {
+      //   throw new Error("Failed to authenticate client");
+      // }
+
+      // const clientData = await clientLoginResponse.json();
+      // const adminToken = clientData.access_token;
+
+      // // Pobieranie informacji o użytkowniku
+      // const userResponse = await fetch(`${API_BASE_URL}/user/by-username/${username}`, {
+      //   method: "GET",
+      //   headers: {
+      //     "Authorization": `Bearer ${adminToken}`,
+      //   },
+      // });
+
+      // if (!userResponse.ok) {
+      //   throw new Error("Failed to fetch user information");
+      // }
+
+      // const userData = await userResponse.json();
+      // if (userData.requiredActions && userData.requiredActions.length > 0) {
+      //   throw new Error("User has required actions to complete");
+      // }
+
+      // Normalne logowanie użytkownika
+      const userLoginResponse = await fetch(`${API_BASE_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: "pytainerfrontend",
+          grant_type: "password",
+          username,
+          password,
+        }).toString(),
+      });
+
+      if (!userLoginResponse.ok) {
         throw new Error("Invalid credentials");
       }
 
-      const data = await response.json();
+      const userLoginData = await userLoginResponse.json();
+      localStorage.setItem("token", userLoginData.access_token);
       toast.success("Logged in successfully.");
-      return data;
+      return userLoginData;
     } catch (error: any) {
       toast.error(error.message || "Failed to log in");
       return rejectWithValue(error.message || "Failed to log in");
@@ -61,29 +83,23 @@ export const loginUserThunk = createAsyncThunk(
   }
 );
 
-export const logoutUserThunk = createAsyncThunk(
-  "users/logoutUser",
+export const getUsersThunk = createAsyncThunk(
+  "users/getUsers",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/logout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) {
-        throw new Error("Logout failed");
+        throw new Error("Failed to fetch users");
       }
 
-      toast.success("Logged out successfully.");
-      return true;
+      const data = await response.json();
+      return data;
     } catch (error: any) {
-      toast.error(error.message || "Failed to log out");
-      return rejectWithValue(error.message || "Failed to log out");
+      return rejectWithValue(error.message || "Failed to fetch users");
     }
   }
 );
@@ -91,27 +107,30 @@ export const logoutUserThunk = createAsyncThunk(
 export const addUserThunk = createAsyncThunk(
   "users/addUser",
   async (
-    userData: { name: string; email: string; password: string },
+    userData: {
+      username: string;
+      fullname: string;
+      firstname: string;
+      surname: string;
+      email: string;
+      enabled: boolean;
+      emailVerified: boolean;
+    },
     { rejectWithValue }
   ) => {
     try {
-      const response = await fetch(
-        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
+      const response = await fetch("http://localhost:2137/api/v1/auth/user", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userData),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to add user");
       }
 
       const data = await response.json();
-      toast.success("User added successfully.");
+      toast.success(`User added successfully.`);
       return data;
     } catch (error: any) {
       toast.error(error.message || "Failed to add user");
@@ -123,23 +142,21 @@ export const addUserThunk = createAsyncThunk(
 export const updateUserThunk = createAsyncThunk(
   "users/updateUser",
   async (
-    {
-      uuid,
-      userData,
-    }: { uuid: string; userData: Partial<{ name: string; email: string }> },
+    userData: {
+      id: string;
+      username: string;
+      firstname: string;
+      surname: string;
+      email: string;
+    },
     { rejectWithValue }
   ) => {
     try {
-      const response = await fetch(
-        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/update/${uuid}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
+      const response = await fetch("http://localhost:2137/api/v1/auth/user", {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userData),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update user");
@@ -157,12 +174,13 @@ export const updateUserThunk = createAsyncThunk(
 
 export const deleteUserThunk = createAsyncThunk(
   "users/deleteUser",
-  async (uuid: string, { rejectWithValue }) => {
+  async (userId: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `https://pytainerbackend-bab3amgdbyh0ftg2.polandcentral-01.azurewebsites.net/api/v1/delete/${uuid}`,
+        `http://localhost:2137/api/v1/auth/user?userId=${userId}`,
         {
           method: "DELETE",
+          headers: getAuthHeaders(),
         }
       );
 
@@ -171,7 +189,7 @@ export const deleteUserThunk = createAsyncThunk(
       }
 
       toast.success("User deleted successfully.");
-      return uuid;
+      return userId;
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
       return rejectWithValue(error.message || "Failed to delete user");

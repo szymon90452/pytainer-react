@@ -1,21 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  fetchUserThunk,
   loginUserThunk,
-  logoutUserThunk,
   addUserThunk,
   updateUserThunk,
   deleteUserThunk,
+  getUsersThunk,
 } from "../thunk/userThunk";
 import { TStatus } from "@/types/TStatus";
 
 interface UserState {
   user: any;
   users: any;
-  fetchUserStatus: TStatus;
   loginStatus: TStatus;
-  logoutStatus: TStatus;
+  getUsersStatus: TStatus;
   addUserStatus: TStatus;
   updateUserStatus: TStatus;
   deleteUserStatus: TStatus;
@@ -23,27 +21,9 @@ interface UserState {
 
 const initialState: UserState = {
   user: undefined,
-  users: [
-    { id: 1, username: "admin", fullName: "Administrator" },
-    {
-      id: 2,
-      username: "filpaw001",
-      fullName: "Filip Pawłowski",
-    },
-    {
-      id: 3,
-      username: "kackrz000",
-      fullName: "Kacper Krzyżniewski",
-    },
-    {
-      id: 4,
-      username: "szyjan004",
-      fullName: "Szymon Janiak",
-    },
-  ],
-  fetchUserStatus: null,
+  users: [],
   loginStatus: null,
-  logoutStatus: null,
+  getUsersStatus: null,
   addUserStatus: null,
   updateUserStatus: null,
   deleteUserStatus: null,
@@ -55,9 +35,7 @@ const userSlice = createSlice({
   reducers: {
     resetUserState: (state) => {
       state.user = undefined;
-      state.fetchUserStatus = null;
       state.loginStatus = null;
-      state.logoutStatus = null;
       state.addUserStatus = null;
       state.updateUserStatus = null;
       state.deleteUserStatus = null;
@@ -65,18 +43,6 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch user
-      .addCase(fetchUserThunk.pending, (state) => {
-        state.fetchUserStatus = "loading";
-      })
-      .addCase(fetchUserThunk.fulfilled, (state, { payload }) => {
-        state.fetchUserStatus = "success";
-        state.user = payload || null;
-      })
-      .addCase(fetchUserThunk.rejected, (state) => {
-        state.fetchUserStatus = "failed";
-        state.user = null;
-      })
 
       // Login user
       .addCase(loginUserThunk.pending, (state) => {
@@ -90,16 +56,16 @@ const userSlice = createSlice({
         state.loginStatus = "failed";
       })
 
-      // Logout user
-      .addCase(logoutUserThunk.pending, (state) => {
-        state.logoutStatus = "loading";
+      // Get users
+      .addCase(getUsersThunk.pending, (state) => {
+        state.getUsersStatus = "loading";
       })
-      .addCase(logoutUserThunk.fulfilled, (state) => {
-        state.logoutStatus = "success";
-        state.user = null;
+      .addCase(getUsersThunk.fulfilled, (state, { payload }) => {
+        state.getUsersStatus = "success";
+        state.users = payload;
       })
-      .addCase(logoutUserThunk.rejected, (state) => {
-        state.logoutStatus = "failed";
+      .addCase(getUsersThunk.rejected, (state) => {
+        state.getUsersStatus = "failed";
       })
 
       // Add user
