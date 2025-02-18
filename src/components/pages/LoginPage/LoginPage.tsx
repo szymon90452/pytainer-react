@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { loginUserThunk } from "@/redux/thunk/userThunk";
+import { loginUserThunk, resetPasswordThunk } from "@/redux/thunk/userThunk";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -29,11 +29,12 @@ const LoginPage = () => {
     };
 
     const handleChangePassword = async () => {
-        // Wyślij żądanie zmiany hasła (tutaj dodaj logikę do wysyłania nowego hasła do backendu)
-        console.log("New password submitted: ", newPassword);
-        setPassword("");
-        setNewPassword("");
-        setUpdatePasswordMode(false);
+        const result = await dispatch(resetPasswordThunk({ username, newPassword }) as any);
+        if (resetPasswordThunk.fulfilled.match(result)) {
+            setPassword("");
+            setNewPassword("");
+            setUpdatePasswordMode(false);
+        }
     };
 
     return (

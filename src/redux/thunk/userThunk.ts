@@ -171,3 +171,95 @@ export const deleteUserThunk = createAsyncThunk(
     }
   }
 );
+
+export const resetPasswordThunk = createAsyncThunk(
+  "users/resetPassword",
+  async (
+    { username, newPassword }: { username: string; newPassword: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const adminLoginResponse = await fetch(`${API_BASE_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: "pytainerfrontend",
+          grant_type: "password",
+          username: "frontend",
+          password: "SomeFrontendPassword123!",
+          scope: "openid",
+        }).toString(),
+      });
+
+      if (!adminLoginResponse.ok) {
+        throw new Error("Failed to authenticate admin account");
+      }
+
+      const adminData = await adminLoginResponse.json();
+      const adminToken = adminData.access_token;
+
+      const userResponse = await fetch(`${API_BASE_URL}/user/by-username/${username}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("Failed to fetch user information");
+      }
+
+      const userData = await userResponse.json();
+      const userId = userData.id;
+
+      const resetResponse = await fetch(`${API_BASE_URL}/user/request/password/${userId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+
+      if (!resetResponse.ok) {
+        throw new Error("Failed to reset password");
+      }
+
+      console.log(resetResponse.body)
+
+      toast.success("Password reset successfully.");
+      return { username, userId };
+    } catch (error: any) {
+      toast.error(error.message || "Failed to reset password");
+      return rejectWithValue(error.message || "Failed to reset password");
+    }
+  }
+);
+
+export const requestPasswordChangeThunk = createAsyncThunk(
+  "users/requestPasswordChange",
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `http://localhost:2137/api/v1/auth/user/request/password/${userId}`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to request password change");
+      }
+
+      toast.success("Password change request sent successfully.");
+      return { userId };
+    } catch (error: any) {
+      toast.error(error.message || "Failed to request password change");
+      return rejectWithValue(error.message || "Failed to request password change");
+    }
+  }
+);

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { PlusCircle, Search, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Search, Edit, Trash2, Key } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,10 +15,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { deleteUserThunk, getUsersThunk } from "@/redux/thunk/userThunk";
+import { deleteUserThunk, getUsersThunk, requestPasswordChangeThunk } from "@/redux/thunk/userThunk";
 import { useNavigate } from "react-router-dom";
 import DeleteUserDialog from "@/components/dialogs/DeleteUserDialog";
 import UpdateUserDialog from "@/components/dialogs/UpdateUserDialog";
+import RequestChangePasswordDialog from "@/components/dialogs/RequestChangePasswordDialog";
 
 const UsersPage = () => {
   const dispatch = useAppDispatch();
@@ -31,6 +32,7 @@ const UsersPage = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   useEffect(() => {
     const filtered = users.filter(
@@ -51,11 +53,23 @@ const UsersPage = () => {
     setUpdateOpen(true);
   };
 
+  const handleRequestClick = (user: any) => {
+    setSelectedUser(user);
+    setRequestOpen(true);
+  };
+
   const confirmDelete = () => {
     if (selectedUser) {
       dispatch(deleteUserThunk(selectedUser.id))
     }
     setDeleteOpen(false);
+  };
+
+  const confirmRequestChangePassword = () => {
+    if (selectedUser) {
+      dispatch(requestPasswordChangeThunk(selectedUser.id))
+    }
+    setRequestOpen(false);
   };
 
   useEffect(() => {
@@ -95,7 +109,7 @@ const UsersPage = () => {
             <TableRow>
               <TableHead>Email address</TableHead>
               <TableHead>Username</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[200px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,7 +119,7 @@ const UsersPage = () => {
               <TableRow key={user.id}>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username}</TableCell>
-                <TableCell>
+                <TableCell className="flex flex-row">
                   <Button variant="ghost" size="icon" onClick={() => handleUpdateClick(user)}>
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -114,6 +128,9 @@ const UsersPage = () => {
                     size="icon"
                     onClick={() => handleDeleteClick(user)}>
                     <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleRequestClick(user)}>
+                    <Key className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -126,6 +143,12 @@ const UsersPage = () => {
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={confirmDelete}
+      />
+
+      <RequestChangePasswordDialog
+        open={requestOpen}
+        onClose={() => setRequestOpen(false)}
+        onConfirm={confirmRequestChangePassword}
       />
 
       <UpdateUserDialog
