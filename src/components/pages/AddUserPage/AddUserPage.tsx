@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "@/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addUserThunk } from "@/redux/thunk/userThunk";
+import { resetAddUserStatus } from "@/redux/slice/userSlice";
 
 const AddUserPage = () => {
   const dispatch = useAppDispatch();
@@ -19,7 +20,7 @@ const AddUserPage = () => {
     emailVerified: false,
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const addUserStatus = useAppSelector((state) => state.user.addUserStatus);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -37,16 +38,15 @@ const AddUserPage = () => {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const resultAction = await dispatch(addUserThunk(userData));
-      if (addUserThunk.fulfilled.match(resultAction)) {
-        navigate("/users");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    dispatch(addUserThunk(userData));
   };
+
+  useEffect(() => {
+    if(addUserStatus === "success"){
+      dispatch(resetAddUserStatus())
+      navigate("/users")
+    }
+  }, [addUserStatus])
 
   return (
     <div className="w-full">
@@ -109,8 +109,8 @@ const AddUserPage = () => {
             <span>Email Verified</span>
           </label>
         </div>
-        <Button className="w-full" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Adding..." : "Add User"}
+        <Button className="w-full" type="submit" disabled={addUserStatus === "loading"}>
+          {addUserStatus === "loading" ? "Adding..." : "Add User"}
         </Button>
       </form>
     </div>

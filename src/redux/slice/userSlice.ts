@@ -40,6 +40,15 @@ const userSlice = createSlice({
       state.updateUserStatus = null;
       state.deleteUserStatus = null;
     },
+    resetLoginStatus: (state) => {
+      state.loginStatus = null;
+    },
+    resetAddUserStatus: (state) => {
+      state.addUserStatus = null;
+    },
+    resetDeleteStatus: (state) => {
+      state.deleteUserStatus = null;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -105,5 +114,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { resetUserState } = userSlice.actions;
+export const { resetUserState, resetLoginStatus, resetAddUserStatus } = userSlice.actions;
 export default userSlice.reducer;

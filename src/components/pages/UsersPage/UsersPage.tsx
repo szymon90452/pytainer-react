@@ -14,24 +14,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { getUsersThunk } from "@/redux/thunk/userThunk";
+import { deleteUserThunk, getUsersThunk } from "@/redux/thunk/userThunk";
 import { useNavigate } from "react-router-dom";
 import DeleteUserDialog from "@/components/dialogs/DeleteUserDialog";
+import UpdateUserDialog from "@/components/dialogs/UpdateUserDialog";
 
 const UsersPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const users = useAppSelector((state) => state.user.users);
+  const {users, deleteUserStatus} = useAppSelector((state) => state.user);
   const [filteredUsers, setFilteredUsers] = useState(users);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortColumn, setSortColumn] = useState("username");
-  const [sortDirection, setSortDirection] = useState("asc");
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   useEffect(() => {
     const filtered = users.filter(
@@ -42,38 +41,28 @@ const UsersPage = () => {
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
 
-  const handleSort = (column: any) => {
-    if (column === sortColumn) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   const handleDeleteClick = (user: any) => {
     setSelectedUser(user);
     setDeleteOpen(true);
   };
 
+  const handleUpdateClick = (user: any) => {
+    setSelectedUser(user);
+    setUpdateOpen(true);
+  };
+
   const confirmDelete = () => {
     if (selectedUser) {
-      // setUsers(users.filter((u) => u.id !== selectedUser.id));
-      toast.success("User has been deleted!");
+      dispatch(deleteUserThunk(selectedUser.id))
     }
     setDeleteOpen(false);
   };
 
   useEffect(() => {
-    const sorted = [...filteredUsers].sort((a: any, b: any) => {
-      if (a[sortColumn] < b[sortColumn])
-        return sortDirection === "asc" ? -1 : 1;
-      if (a[sortColumn] > b[sortColumn])
-        return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-    setFilteredUsers(sorted);
-  }, [sortColumn, sortDirection]);
+    if(deleteUserStatus === "success"){
+      dispatch(getUsersThunk());
+    }
+  }, [deleteUserStatus])
 
   useEffect(() => {
     dispatch(getUsersThunk());
@@ -104,18 +93,20 @@ const UsersPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Full name</TableHead>
+              <TableHead>Email address</TableHead>
               <TableHead>Username</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.map((user: any) => (
+            {filteredUsers
+            .filter((user: any) => user.username !== "frontend")
+            .map((user: any) => (
               <TableRow key={user.id}>
-                <TableCell>{user.fullName}</TableCell>
+                <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon" onClick={() => {}}>
+                  <Button variant="ghost" size="icon" onClick={() => handleUpdateClick(user)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
@@ -134,9 +125,13 @@ const UsersPage = () => {
       <DeleteUserDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        onConfirm={() => {
-          setDeleteOpen(false);
-        }}
+        onConfirm={confirmDelete}
+      />
+
+      <UpdateUserDialog
+        open={updateOpen}
+        onClose={() => setUpdateOpen(false)}
+        user={selectedUser}
       />
     </div>
   );
