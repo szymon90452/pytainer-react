@@ -101,7 +101,7 @@ export const addUserThunk = createAsyncThunk(
         throw new Error("Failed to add user");
       }
 
-      const data = await response;
+      const data = await response.text();
       toast.success(`User added successfully.`);
       return data;
     } catch (error: any) {

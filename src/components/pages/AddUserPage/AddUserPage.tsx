@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { toast } from "react-toastify";
@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addUserThunk } from "@/redux/thunk/userThunk";
 import { resetAddUserStatus } from "@/redux/slice/userSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const AddUserPage = () => {
   const dispatch = useAppDispatch();
@@ -19,6 +26,8 @@ const AddUserPage = () => {
     enabled: true,
     emailVerified: false,
   });
+  const [tempPassword, setTempPassword] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const addUserStatus = useAppSelector((state) => state.user.addUserStatus);
 
@@ -38,15 +47,18 @@ const AddUserPage = () => {
       return;
     }
 
-    dispatch(addUserThunk(userData));
+    const result = await dispatch(addUserThunk(userData) as any);
+    if (addUserThunk.fulfilled.match(result)) {
+      setTempPassword(result.payload);
+      setDialogOpen(true);
+    }
   };
 
-  useEffect(() => {
-    if(addUserStatus === "success"){
-      dispatch(resetAddUserStatus())
-      navigate("/users")
-    }
-  }, [addUserStatus])
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    dispatch(resetAddUserStatus());
+    navigate("/users");
+  };
 
   return (
     <div className="w-full">
@@ -113,6 +125,18 @@ const AddUserPage = () => {
           {addUserStatus === "loading" ? "Adding..." : "Add User"}
         </Button>
       </form>
+      
+      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>User Created</DialogTitle>
+          </DialogHeader>
+          <p>The temporary password for the user is: <strong>{tempPassword}</strong></p>
+          <DialogFooter>
+            <Button onClick={handleDialogClose}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
