@@ -135,7 +135,7 @@ export const updateUserThunk = createAsyncThunk(
         throw new Error("Failed to update user");
       }
 
-      const data = await response.json();
+      const data = await response;
       toast.success("User updated successfully.");
       return data;
     } catch (error: any) {

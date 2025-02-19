@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,16 +12,37 @@ interface IUpdateUserDialogProps {
   user: {
     id: string;
     username: string;
-    firstname: string;
-    surname: string;
+    firstName: string | null;
+    lastName: string | null;
     email: string;
   };
 }
 
 const UpdateUserDialog: React.FC<IUpdateUserDialogProps> = ({ open, onClose, user }) => {
   const dispatch = useAppDispatch();
-  const [formData, setFormData] = useState({ ...user });
+  const [formData, setFormData] = useState({
+    id: "",
+    username: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
   const [loading, setLoading] = useState(false);
+
+  // 🛠 Aktualizacja `formData` po otrzymaniu nowych danych użytkownika
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        id: user.id,
+        username: user.username || "",
+        firstName: user.firstName || "", // Obsługa `null`
+        lastName: user.lastName || "", // Obsługa `null`
+        email: user.email || "",
+      });
+    }
+  }, [user]);
+
+  console.log("Updated formData:", formData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,12 +67,12 @@ const UpdateUserDialog: React.FC<IUpdateUserDialogProps> = ({ open, onClose, use
             <Input id="username" name="username" value={formData.username} onChange={handleChange} required />
           </div>
           <div>
-            <Label htmlFor="firstname">First Name</Label>
-            <Input id="firstname" name="firstname" value={formData.firstname} onChange={handleChange} required />
+            <Label htmlFor="firstName">First Name</Label>
+            <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required />
           </div>
           <div>
-            <Label htmlFor="surname">Surname</Label>
-            <Input id="surname" name="surname" value={formData.surname} onChange={handleChange} required />
+            <Label htmlFor="lastName">Surname</Label>
+            <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required />
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
